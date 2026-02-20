@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard BOS - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">Dashboard BOS</h2>
+                <p class="text-muted mb-0">Pantau dan kelola gaji karyawan</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('bos_hasil_kerja') }}" class="btn btn-warning">
+                    <i class="bi bi-clock-history me-2"></i>Pending ({{ pending_count }})
+                </a>
+                <form action='{{ url_for("bos_karyawan") }}'>
+                  <button class="btn btn-danger" data-bs-toggle="modal">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Gaji
+                  </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="col-md-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Total Karyawan</div>
+                    <div class="stat-value">{{ total_karyawan }}</div>
+                </div>
+                <div class="stat-icon primary">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Total Gaji Semua</div>
+                    <div class="stat-value text-primary">Rp {{ "{:,.0f}".format(total_gaji_semua) }}</div>
+                </div>
+                <div class="stat-icon success">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Total Hutang</div>
+                    <div class="stat-value text-warning">Rp {{ "{:,.0f}".format(total_hutang_semua) }}</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Yang Harus Dibayar</div>
+                    <div class="stat-value" style="color: #06b6d4;">Rp {{ "{:,.0f}".format(total_yang_harus_dibayar) }}</div>
+                </div>
+                <div class="stat-icon info">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart Section -->
+    <div class="col-lg-7">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bar-chart-line text-primary me-2"></i>Grafik Gaji per Karyawan
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="gajiChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-5">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning-charge text-warning me-2"></i>Aksi Cepat
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="{{ url_for('bos_hasil_kerja') }}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="bi bi-clipboard-check fs-4 d-block mb-2"></i>
+                            Approve Kerja
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('bos_hutang') }}" class="btn btn-outline-warning w-100 py-3">
+                            <i class="bi bi-cash-coin fs-4 d-block mb-2"></i>
+                            Tambah Hutang
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('bos_harga') }}" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-tags fs-4 d-block mb-2"></i>
+                            Edit Harga
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ url_for('bos_karyawan') }}" class="btn btn-outline-info w-100 py-3">
+                            <i class="bi bi-people fs-4 d-block mb-2"></i>
+                            Data Karyawan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Aktivitas Terbaru
+                </h5>
+                <a href="{{ url_for('bos_hasil_kerja') }}" class="btn btn-sm btn-outline-primary">
+                    Lihat Semua
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Karyawan</th>
+                                <th>Ukuran/Jenis</th>
+                                <th>Jumlah</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in recent_kerja %}
+                            <tr>
+                                <td>{{ item.created_at[:10] }}</td>
+                                <td class="fw-semibold">{{ item.nama_lengkap }}</td>
+                                <td>
+                                    {{ item.ukuran|replace('_', ' ')|title }}
+                                    {% if item.jenis %}
+                                        <span class="text-muted">/ {{ item.jenis|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.jumlah }}</td>
+                                <td class="fw-bold">Rp {{ "{:,.0f}".format(item.total_harga) }}</td>
+                                <td>
+                                    <span class="badge-status badge-{{ 'pending' if item.status == 'pending' else 'approved' if item.status == 'approved' else 'rejected' }}">
+                                        {{ item.status|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Belum ada aktivitas
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chart.js - Gaji per Karyawan
+    const ctx = document.getElementById('gajiChart').getContext('2d');
+    
+    const chartData = {
+        labels: {{ chart_data|map(attribute='nama_lengkap')|list|tojson }},
+        datasets: [{
+            label: 'Total Gaji',
+            data: {{ chart_data|map(attribute='total')|list|tojson }},
+            backgroundColor: 'rgba(37, 99, 235, 0.8)',
+            borderColor: 'rgba(37, 99, 235, 1)',
+            borderWidth: 2,
+            borderRadius: 8,
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + (value / 1000) + 'K';
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

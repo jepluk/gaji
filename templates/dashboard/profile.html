@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil Saya - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Profil Saya</h2>
+                <p class="text-muted mb-0">Kelola informasi profil dan keamanan akun</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Profile Info Card -->
+    <div class="col-lg-4">
+        <div class="content-card text-center">
+            <div class="card-body">
+                <div class="position-relative d-inline-block mb-3">
+                    {% if current_user.foto_profil %}
+                    <img src="{{ url_for('uploaded_file', filename=current_user.foto_profil) }}" 
+                         alt="Profile" class="rounded-circle" width="120" height="120" style="object-fit: cover;">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/default-avatar.png') }}" 
+                         alt="Profile" class="rounded-circle" width="120" height="120">
+                    {% endif %}
+                    <span class="position-absolute bottom-0 end-0 badge bg-success rounded-circle p-2">
+                        <i class="bi bi-check-lg"></i>
+                    </span>
+                </div>
+                <h5 class="fw-bold mb-1">{{ current_user.nama_lengkap }}</h5>
+                <p class="text-muted mb-2">@{{ current_user.username }}</p>
+                <span class="badge bg-primary">{{ current_user.role|upper }}</span>
+                
+                <hr class="my-4">
+                
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">WhatsApp</span>
+                        <span class="fw-semibold">{{ current_user.whatsapp or '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Bergabung</span>
+                        <span class="fw-semibold">{{ session.get('created_at', '-') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Profile Form -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pencil-square text-primary me-2"></i>Edit Profil
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            {{ form.nama_lengkap(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username</label>
+                            {{ form.username(class="form-control") }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nomor WhatsApp</label>
+                        {{ form.whatsapp(class="form-control", placeholder="Contoh: 08123456789") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Foto Profil</label>
+                        {{ form.foto_profil(class="form-control", accept=".jpg,.jpeg,.png") }}
+                        <small class="text-muted">Format: JPG, JPEG, PNG. Maksimal 16MB</small>
+                    </div>
+                    
+                    {{ form.submit(class="btn btn-primary", value="Simpan Perubahan") }}
+                </form>
+            </div>
+        </div>
+        
+        <!-- Change Password -->
+        <div class="content-card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-lock text-danger me-2"></i>Ubah Password
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('change_password') }}">
+                    {{ password_form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Password Saat Ini</label>
+                        {{ password_form.current_password(class="form-control", type="password") }}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password Baru</label>
+                            {{ password_form.new_password(class="form-control", type="password") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Konfirmasi Password Baru</label>
+                            {{ password_form.confirm_password(class="form-control", type="password") }}
+                        </div>
+                    </div>
+                    
+                    {{ password_form.submit(class="btn btn-danger", value="Ubah Password") }}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Work History -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Riwayat Input Kerja
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Ukuran/Jenis</th>
+                                <th>Jumlah</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in kerja_history %}
+                            <tr>
+                                <td>{{ item.created_at[:10] }}</td>
+                                <td>
+                                    {{ item.ukuran|replace('_', ' ')|title }}
+                                    {% if item.jenis %}
+                                        <span class="text-muted">/ {{ item.jenis|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.jumlah }}</td>
+                                <td>Rp {{ "{:,.0f}".format(item.total_harga) }}</td>
+                                <td>
+                                    <span class="badge-status badge-{{ 'pending' if item.status == 'pending' else 'approved' if item.status == 'approved' else 'rejected' }}">
+                                        {{ item.status|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    Belum ada riwayat
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reset History -->
+    {% if reset_history %}
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-arrow-counterclockwise text-warning me-2"></i>Riwayat Reset Gaji
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal Reset</th>
+                                <th>Gaji Sebelumnya</th>
+                                <th>Hutang Sebelumnya</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in reset_history %}
+                            <tr>
+                                <td>{{ item.created_at[:10] }}</td>
+                                <td>Rp {{ "{:,.0f}".format(item.total_gaji_sebelumnya) }}</td>
+                                <td>Rp {{ "{:,.0f}".format(item.total_hutang_sebelumnya) }}</td>
+                                <td>{{ item.keterangan }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

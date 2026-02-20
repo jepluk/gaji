@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Hutang Saya - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Hutang / Bon Saya</h2>
+                <p class="text-muted mb-0">Daftar hutang dan bon yang tercatat</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Summary Cards -->
+    <div class="col-md-6">
+        <div class="stat-card border-start border-4 border-warning">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Total Hutang Aktif</div>
+                    <div class="stat-value text-warning">Rp {{ "{:,.0f}".format(total_aktif) }}</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="stat-card border-start border-4 border-success">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="stat-label">Total Hutang Lunas</div>
+                    <div class="stat-value text-success">Rp {{ "{:,.0f}".format(total_lunas) }}</div>
+                </div>
+                <div class="stat-icon success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hutang List -->
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul text-primary me-2"></i>Daftar Hutang
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Keterangan</th>
+                                <th>Nominal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in hutang_list %}
+                            <tr>
+                                <td>{{ item.tanggal }}</td>
+                                <td>{{ item.keterangan }}</td>
+                                <td class="fw-semibold">Rp {{ "{:,.0f}".format(item.nominal) }}</td>
+                                <td>
+                                    <span class="badge-status badge-{{ 'active' if item.status == 'aktif' else 'approved' }}">
+                                        {{ item.status|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    Tidak ada data hutang
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

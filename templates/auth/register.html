@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <title>Register - Sistem Gaji Karyawan</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --bg-color: #f1f5f9;
+        }
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .register-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .register-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .register-subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .form-floating {
+            margin-bottom: 14px;
+        }
+        
+        .form-floating .form-control {
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            height: 54px;
+            padding-left: 44px;
+        }
+        
+        .form-floating .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            z-index: 10;
+        }
+        
+        .form-floating label {
+            padding-left: 44px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            margin-top: 8px;
+        }
+        
+        .btn-register:hover {
+            background: linear-gradient(135deg, var(--primary-dark), #1e3a8a);
+            transform: translateY(-1px);
+        }
+        
+        .register-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .register-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .invalid-feedback {
+            font-size: 0.8rem;
+            margin-left: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card animate-fade-in">
+            <div class="register-header">
+                <div class="register-logo">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <h1 class="register-title">Buat Akun Baru</h1>
+                <p class="register-subtitle">Daftar sebagai karyawan</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('auth_register') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-floating position-relative">
+                    <i class="bi bi-person input-icon"></i>
+                    {{ form.nama_lengkap(class="form-control" + (" is-invalid" if form.nama_lengkap.errors else ""), id="nama_lengkap", placeholder="Nama Lengkap") }}
+                    <label for="nama_lengkap">Nama Lengkap</label>
+                    {% if form.nama_lengkap.errors %}
+                        <div class="invalid-feedback">{{ form.nama_lengkap.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating position-relative">
+                    <i class="bi bi-at input-icon"></i>
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), id="username", placeholder="Username") }}
+                    <label for="username">Username</label>
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback">{{ form.username.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating position-relative">
+                    <i class="bi bi-whatsapp input-icon"></i>
+                    {{ form.whatsapp(class="form-control" + (" is-invalid" if form.whatsapp.errors else ""), id="whatsapp", placeholder="Nomor WhatsApp") }}
+                    <label for="whatsapp">Nomor WhatsApp (Opsional)</label>
+                    {% if form.whatsapp.errors %}
+                        <div class="invalid-feedback">{{ form.whatsapp.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating position-relative">
+                    <i class="bi bi-lock input-icon"></i>
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password", placeholder="Password", type="password") }}
+                    <label for="password">Password</label>
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback">{{ form.password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating position-relative">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), id="confirm_password", placeholder="Konfirmasi Password", type="password") }}
+                    <label for="confirm_password">Konfirmasi Password</label>
+                    {% if form.confirm_password.errors %}
+                        <div class="invalid-feedback">{{ form.confirm_password.errors[0] }}</div>
+                    {% endif %}
+                </div>
+                
+                {{ form.submit(class="btn btn-primary btn-register", value="Daftar Sekarang") }}
+            </form>
+            
+            <div class="register-footer">
+                <p>Sudah punya akun? <a href="{{ url_for('auth_login') }}">Login disini</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-hide alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

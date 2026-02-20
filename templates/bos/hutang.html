@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Hutang - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Kelola Hutang/Bon</h2>
+                <p class="text-muted mb-0">Tambah dan kelola hutang karyawan</p>
+            </div>
+            <a href="{{ url_for('bos_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Add Hutang Form -->
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Tambah Hutang
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('bos_hutang') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Karyawan</label>
+                        {{ form.user_id(class="form-select") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nominal</label>
+                        {{ form.nominal(class="form-control", placeholder="Masukkan nominal") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Keterangan</label>
+                        {{ form.keterangan(class="form-control", rows="3", placeholder="Keterangan hutang") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tanggal</label>
+                        {{ form.tanggal(class="form-control", type="date") }}
+                    </div>
+                    
+                    {{ form.submit(class="btn btn-primary w-100", value="Tambah Hutang") }}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hutang List -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul text-primary me-2"></i>Daftar Hutang
+                </h5>
+                <div>
+                    <select name="status" class="form-select form-select-sm" onchange="window.location.href='?status=' + this.value">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" {{ 'selected' if status_filter == 'aktif' }}>Aktif</option>
+                        <option value="lunas" {{ 'selected' if status_filter == 'lunas' }}>Lunas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Karyawan</th>
+                                <th>Keterangan</th>
+                                <th>Nominal</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in hutang_list %}
+                            <tr>
+                                <td>{{ item.tanggal }}</td>
+                                <td class="fw-semibold">{{ item.nama_lengkap }}</td>
+                                <td>{{ item.keterangan }}</td>
+                                <td class="fw-semibold">Rp {{ "{:,.0f}".format(item.nominal) }}</td>
+                                <td>
+                                    <span class="badge-status badge-{{ 'active' if item.status == 'aktif' else 'approved' }}">
+                                        {{ item.status|upper }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if item.status == 'aktif' %}
+                                    <form method="POST" action="{{ url_for('lunasi_hutang', hutang_id=item.id) }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-check-lg me-1"></i>Lunasi
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    Tidak ada data hutang
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                <div class="p-3 border-top">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item {{ 'disabled' if page == 1 }}">
+                                <a class="page-link" href="{{ url_for('bos_hutang', page=page-1, status=status_filter) }}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {{ 'active' if p == page }}">
+                                <a class="page-link" href="{{ url_for('bos_hutang', page=p, status=status_filter) }}">{{ p }}</a>
+                            </li>
+                            {% endfor %}
+                            <li class="page-item {{ 'disabled' if page == total_pages }}">
+                                <a class="page-link" href="{{ url_for('bos_hutang', page=page+1, status=status_filter) }}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

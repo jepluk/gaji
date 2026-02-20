@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Harga - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Kelola Harga</h2>
+                <p class="text-muted mb-0">Atur harga untuk setiap ukuran dan jenis</p>
+            </div>
+            <a href="{{ url_for('bos_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Form -->
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Tambah/Edit Harga
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('bos_harga') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Ukuran</label>
+                        {{ form.ukuran(class="form-control", placeholder="Contoh: besar, kecil, sepeda") }}
+                        <small class="text-muted">Gunakan underscore untuk spasi</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Jenis (Opsional)</label>
+                        {{ form.jenis(class="form-control", placeholder="Contoh: tipis, semi") }}
+                        <small class="text-muted">Kosongkan untuk sepeda/sepeda mini</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Harga</label>
+                        {{ form.harga(class="form-control", placeholder="Masukkan harga") }}
+                    </div>
+                    
+                    {{ form.submit(class="btn btn-primary w-100", value="Simpan Harga") }}
+                </form>
+            </div>
+        </div>
+        
+        <!-- Info Card -->
+        <div class="content-card mt-3">
+            <div class="card-body">
+                <h6 class="fw-semibold mb-3">
+                    <i class="bi bi-info-circle text-info me-2"></i>Harga Default
+                </h6>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-1">Besar Tipis: <strong>Rp 33.000</strong></li>
+                    <li class="mb-1">Besar Semi: <strong>Rp 37.000</strong></li>
+                    <li class="mb-1">Kecil Tipis: <strong>Rp 27.000</strong></li>
+                    <li class="mb-1">Kecil Semi: <strong>Rp 30.000</strong></li>
+                    <li class="mb-1">Sepeda: <strong>Rp 25.000</strong></li>
+                    <li class="mb-1">Sepeda Mini: <strong>Rp 22.000</strong></li>
+                    <li class="mb-1">Jumbo Tipis: <strong>Rp 37.000</strong></li>
+                    <li>Jumbo Semi: <strong>Rp 40.000</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Harga List -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-tags text-primary me-2"></i>Daftar Harga
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ukuran</th>
+                                <th>Jenis</th>
+                                <th>Harga</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in harga_list %}
+                            <tr>
+                                <td class="fw-semibold">{{ item.ukuran|replace('_', ' ')|title }}</td>
+                                <td>
+                                    {% if item.jenis %}
+                                        {{ item.jenis|title }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-primary">Rp {{ "{:,.0f}".format(item.harga) }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('delete_harga', harga_id=item.id) }}" 
+                                          class="d-inline" onsubmit="return confirm('Yakin ingin menghapus harga ini?')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    Belum ada data harga
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

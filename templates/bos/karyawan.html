@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Data Karyawan - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Data Karyawan</h2>
+                <p class="text-muted mb-0">Lihat data dan gaji semua karyawan</p>
+            </div>
+            <a href="{{ url_for('bos_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Karyawan Cards -->
+    {% for karyawan in karyawan_list %}
+    <div class="col-md-6 col-xl-4">
+        <div class="content-card h-100 shadow-sm">
+            <div class="card-body">
+                <!-- Profil -->
+                <div class="d-flex align-items-center mb-3">
+                    {% if karyawan.foto_profil %}
+                    <img src="{{ url_for('uploaded_file', filename=karyawan.foto_profil) }}" 
+                         alt="{{ karyawan.nama_lengkap }}" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                    {% else %}
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 60px; height: 60px; font-size: 1.5rem;">
+                        {{ karyawan.nama_lengkap[0] }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ karyawan.nama_lengkap }}</h5>
+                        <p class="text-muted mb-0">@{{ karyawan.username }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+
+                <!-- Statistik Gaji -->
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Total Gaji</div>
+                        <div class="fw-bold text-primary">Rp {{ "{:,.0f}".format(karyawan.total_gaji or 0) }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small mb-1">Hutang</div>
+                        <div class="fw-bold text-danger">Rp {{ "{:,.0f}".format(karyawan.total_hutang or 0) }}</div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small">Gaji Bersih:</span>
+                    <span class="fw-bold" style="color: #06b6d4;">
+                        Rp {{ "{:,.0f}".format((karyawan.total_gaji or 0) - (karyawan.total_hutang or 0)) }}
+                    </span>
+                </div>
+
+                <hr>
+
+                <!-- Tombol Aksi -->
+                <div class="d-flex gap-2">
+                    {% if karyawan.whatsapp %}
+                    <a href="https://wa.me/{{ karyawan.whatsapp }}" target="_blank" 
+                       class="btn btn-outline-success btn-sm flex-fill">
+                        <i class="bi bi-whatsapp me-1"></i> Hubungi
+                    </a>
+                    {% endif %}
+
+                    <!-- Tombol Reset Gaji -->
+                    <button type="button" class="btn btn-outline-info btn-sm flex-fill" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#resetModal{{ karyawan.id }}">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Gaji
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Reset -->
+    <div class="modal fade" id="resetModal{{ karyawan.id }}" tabindex="-1" aria-labelledby="resetModalLabel{{ karyawan.id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+          <div class="modal-header" style="background-color: #06b6d4; color: white; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+            <h5 class="modal-title" id="resetModalLabel{{ karyawan.id }}">
+              Konfirmasi Reset Gaji
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Apakah Anda yakin ingin mereset semua data gaji, bonus, dan hutang milik <strong>{{ karyawan.nama_lengkap }}</strong>?</p>
+            <p class="text-muted small mb-0">Tindakan ini akan menghapus seluruh data finansial karyawan tersebut.</p>
+          </div>
+          <div class="modal-footer" style="background-color: #f8fafc;">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <form action="{{ url_for('reset_gaji', user_id=karyawan.id) }}" method="post" class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-info text-white">
+                <i class="bi bi-check-circle me-1"></i> Ya, Reset
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+                <p class="text-muted">Belum ada data karyawan</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

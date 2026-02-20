@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Slip Gaji - Sistem Gaji{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="fw-bold mb-1">Slip Gaji</h2>
+                <p class="text-muted mb-0">Generate dan download slip gaji Anda</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+    
+    <!-- Generate Slip Card -->
+    <div class="col-lg-4">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Generate Slip Baru
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('generate_slip') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Periode</label>
+                        <input type="text" name="periode" class="form-control" 
+                               placeholder="Contoh: Januari 2024" required>
+                        <small class="text-muted">Masukkan periode gaji</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-file-earmark-plus me-2"></i>Generate Slip
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Info Card -->
+        <div class="content-card mt-3">
+            <div class="card-body">
+                <h6 class="fw-semibold mb-3">
+                    <i class="bi bi-info-circle text-info me-2"></i>Informasi
+                </h6>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Slip berisi rincian gaji lengkap
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Format PDF siap print
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Data diambil dari hasil kerja approved
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slip History -->
+    <div class="col-lg-8">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Riwayat Slip Gaji
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Periode</th>
+                                <th>Total Kerja</th>
+                                <th>Bonus</th>
+                                <th>Hutang</th>
+                                <th>Gaji Bersih</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for slip in slip_list %}
+                            <tr>
+                                <td>{{ slip.created_at[:10] }}</td>
+                                <td class="fw-semibold">{{ slip.periode }}</td>
+                                <td>Rp {{ "{:,.0f}".format(slip.total_kerja) }}</td>
+                                <td>Rp {{ "{:,.0f}".format(slip.bonus) }}</td>
+                                <td class="text-danger">Rp {{ "{:,.0f}".format(slip.hutang) }}</td>
+                                <td class="fw-bold text-primary">Rp {{ "{:,.0f}".format(slip.gaji_bersih) }}</td>
+                                <td>
+                                    <a href="{{ url_for('download_slip', slip_id=slip.id) }}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-download me-1"></i>Download
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                    Belum ada slip gaji
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
