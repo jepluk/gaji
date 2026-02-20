@@ -17,10 +17,23 @@ from werkzeug.utils import secure_filename
 from wtforms import (DateField, FloatField, IntegerField, PasswordField,
                      SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.validators import DataRequired, EqualTo, Length, NumberRange, Optional
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
 app = Flask(__name__)
+
+# --- Database configuration inserted by assistant ---
+# Use DATABASE_URL (Railway Postgres) if provided; otherwise fallback to local SQLite.
+if os.environ.get("DATABASE_URL"):
+    # SQLAlchemy expects the scheme 'postgresql://' not 'postgres://'
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"].replace("postgres://", "postgresql://")
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gaji.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+# --- end assistant block ---
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'gaji-karyawan-secret-key-2024')
 app.config['DATABASE'] = os.path.join(app.root_path, 'instance', 'gaji_karyawan.db')
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads', 'profile_photos')
